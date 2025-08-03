@@ -263,24 +263,21 @@ namespace Exiled.CustomRoles.API.Features
         }
 
         /// <summary>
-        /// Tries to get a <see cref="IReadOnlyCollection{T}"/> of the specified <see cref="Player"/>'s <see cref="CustomRole"/>s.
+        /// Tries to get the <see cref="CustomRole"/> of the specified <see cref="Player"/>.
         /// </summary>
         /// <param name="player">The player to check.</param>
-        /// <param name="customRoles">The custom roles the player has.</param>
-        /// <returns>True if the player has custom roles.</returns>
-        /// <exception cref="ArgumentNullException">If the player is <see langword="null"/>.</exception>
-        public static bool TryGet(Player player, out IReadOnlyCollection<CustomRole> customRoles)
+        /// <param name="customRole">The custom role the player has.</param>
+        /// <returns><see langword="true"/> if the player has a custom role; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="player"/> is <see langword="null"/>.</exception>
+        public static bool TryGet(Player player, out CustomRole customRole)
         {
             if (player is null)
                 throw new ArgumentNullException(nameof(player));
 
-            List<CustomRole> tempList = ListPool<CustomRole>.Pool.Get();
-            tempList.AddRange(Registered?.Where(customRole => customRole.Check(player)) ?? Array.Empty<CustomRole>());
+            customRole = CustomRole.Registered
+                .FirstOrDefault(role => role.TrackedPlayers.Contains(player));
 
-            customRoles = tempList.AsReadOnly();
-            ListPool<CustomRole>.Pool.Return(tempList);
-
-            return customRoles?.Count > 0;
+            return customRole is not null;
         }
 
         /// <summary>
